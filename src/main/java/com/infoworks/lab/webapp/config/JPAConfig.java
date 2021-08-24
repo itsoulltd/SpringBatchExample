@@ -1,12 +1,15 @@
 package com.infoworks.lab.webapp.config;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.infoworks.lab.jsql.JsqlConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -20,11 +23,25 @@ import javax.sql.DataSource;
 @EnableTransactionManagement
 @EnableJpaRepositories(
         basePackages = {"com.infoworks.lab.domain.repositories"},
-        entityManagerFactoryRef = "jpa-manager-ref",
         transactionManagerRef = "jpa-transaction-ref"
 )
 @PropertySource("classpath:mysql-db.properties")
 public class JPAConfig {
+
+    private Environment env;
+    public JPAConfig(@Autowired Environment env) {
+        this.env = env;
+    }
+
+    @Bean
+    JsqlConfig getJsqlConfig(DataSource dataSource){
+        return new JsqlConfig(dataSource);
+    }
+
+    @Bean("AppDBNameKey")
+    String appDBNameKey(){
+        return env.getProperty("app.db.name");
+    }
 
     @Value("${spring.datasource.driver-class-name}")
     String driverClassName;
@@ -37,7 +54,8 @@ public class JPAConfig {
     @Value("${app.db.name}")
     String persistenceUnitName;
 
-    @Bean("jpa-source")
+    @Primary
+    @Bean
     public DataSource dataSource(){
         DataSource dataSource = DataSourceBuilder
                 .create()
@@ -49,10 +67,11 @@ public class JPAConfig {
         return dataSource;
     }
 
-    @Bean("jpa-manager-ref")
+    @Primary
+    @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder
-            ,@Qualifier("jpa-source") DataSource dataSource){
+            , DataSource dataSource){
         return builder
                 .dataSource(dataSource)
                 .packages("com.infoworks.lab.domain.entities")
@@ -62,7 +81,7 @@ public class JPAConfig {
 
     @Bean("jpa-transaction-ref")
     public PlatformTransactionManager transactionManager(
-            @Qualifier("jpa-manager-ref") EntityManagerFactory entityManagerFactory){
+            EntityManagerFactory entityManagerFactory){
         return new JpaTransactionManager(entityManagerFactory);
     }
 
