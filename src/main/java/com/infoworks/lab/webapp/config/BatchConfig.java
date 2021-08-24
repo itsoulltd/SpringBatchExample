@@ -39,7 +39,7 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean
+    @Bean("taskletJobSample")
     public Job demoJob(){
         return jobs.get("demoJob")
                 .incrementer(new RunIdIncrementer())

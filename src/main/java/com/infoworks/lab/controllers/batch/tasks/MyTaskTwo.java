@@ -8,9 +8,9 @@ import org.springframework.batch.repeat.RepeatStatus;
 public class MyTaskTwo implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        System.out.println("MyTaskOne start..");
+        System.out.println("MyTaskTwo start..");
         // ... your code
-        System.out.println("MyTaskOne done..");
+        System.out.println("MyTaskTwo done..");
         return RepeatStatus.FINISHED;
     }
 }

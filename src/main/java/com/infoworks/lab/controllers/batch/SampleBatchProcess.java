@@ -8,12 +8,13 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SampleBatchProcess {
+public class SampleBatchProcess extends AbstractBatchScheduler{
 
     private Environment env;
     private JobLauncher jobLauncher;
@@ -21,7 +22,8 @@ public class SampleBatchProcess {
 
     public SampleBatchProcess(Environment env
             , JobLauncher jobLauncher
-            , Job job) {
+            ,@Qualifier("taskletJobSample") Job job) {
+        super(env);
         this.env = env;
         this.jobLauncher = jobLauncher;
         this.job = job;
@@ -41,41 +43,24 @@ public class SampleBatchProcess {
      */
 
     @Scheduled(cron = "${batch.processing.cron.expression}")
-    public void process()
-            throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-
+    public void process() {
         if (shouldPreventExecution()) return;
         //
         System.out.println("Running");
         JobParameters params = new JobParametersBuilder()
                 .addString("JobID", String.valueOf(System.currentTimeMillis()))
                 .toJobParameters();
-        jobLauncher.run(job, params);
-    }
-
-    protected int getBatchSize(){
-        String val = env.getProperty("batch.processing.batch.size");
-        return (val != null) ? Integer.valueOf(val) : 1000;
-    }
-
-    protected int getOffset(){
-        String val = env.getProperty("batch.processing.batch.offset");
-        return (val != null) ? Integer.valueOf(val) : 0;
-    }
-
-    protected int getMaxCount(){
-        String val = env.getProperty("batch.processing.batch.max.size");
-        return (val != null) ? Integer.valueOf(val) : -1;
-    }
-
-    protected int getDayMinusCount(){
-        String val = env.getProperty("batch.processing.day.minus.count");
-        return (val != null) ? Integer.valueOf(val) : -1;
-    }
-
-    protected boolean shouldPreventExecution(){
-        String val = env.getProperty("batch.processing.cron.prevent.execution");
-        return (val != null) ? Boolean.valueOf(val) : false;
+        try {
+            jobLauncher.run(job, params);
+        } catch (JobExecutionAlreadyRunningException e) {
+            e.printStackTrace();
+        } catch (JobRestartException e) {
+            e.printStackTrace();
+        } catch (JobInstanceAlreadyCompleteException e) {
+            e.printStackTrace();
+        } catch (JobParametersInvalidException e) {
+            e.printStackTrace();
+        }
     }
 
 }
