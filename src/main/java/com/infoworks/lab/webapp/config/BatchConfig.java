@@ -25,14 +25,12 @@ public class BatchConfig {
         this.steps = steps;
     }
 
-    @Bean
     public Step stepOne(){
         return steps.get("stepOne")
                 .tasklet(new MyTaskOne())
                 .build();
     }
 
-    @Bean
     public Step stepTwo(){
         return steps.get("stepTwo")
                 .tasklet(new MyTaskTwo())
