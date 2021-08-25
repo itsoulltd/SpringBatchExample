@@ -2,8 +2,6 @@ package com.infoworks.lab.webapp.config;
 
 import com.infoworks.lab.controllers.batch.tasks.*;
 import com.infoworks.lab.domain.entities.Passenger;
-import com.infoworks.lab.jsql.ExecutorType;
-import com.infoworks.lab.jsql.JsqlConfig;
 import com.it.soul.lab.sql.SQLExecutor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,11 +10,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
-import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
-import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -61,25 +55,12 @@ public class BatchConfig {
 
         SQLExecutor executor = new SQLExecutor(dataSource.getConnection());
 
-        /*MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
-        queryProvider.setSelectClause("*");
-        queryProvider.setFromClause("FROM Passenger");
-
-        JdbcPagingItemReader<Passenger> itemReader = new JdbcPagingItemReaderBuilder<Passenger>()
-                .dataSource(dataSource)
-                .name("PassengerReader")
-                .fetchSize(10)
-                .rowMapper(new PassengerRowMapper(executor))
-                .queryProvider(queryProvider)
-                .build();*/
-
         JdbcCursorItemReader<List<Passenger>> itemReader = new JdbcCursorItemReaderBuilder<List<Passenger>>()
                 .dataSource(dataSource)
                 .name("PassengerReader")
                 .sql("select * from Passenger")
                 .rowMapper(new PassengerRowMapper(executor))
-                .fetchSize(10)
-                .maxRows(1000)
+                .maxRows(10)
                 .build();
 
         Step one = steps.get("stepOne")
