@@ -9,7 +9,7 @@ public class PassengerListProcessor implements ItemProcessor<List<Passenger>, Li
 
     @Override
     public List<Passenger> process(List<Passenger> passengers) throws Exception {
-        System.out.println("ItemProcessor");
+        System.out.println("PassengerListProcessor: " + Thread.currentThread().getName());
         System.out.println("Processing: " + passengers.size());
         return passengers;
     }
