@@ -1,7 +1,11 @@
 package com.infoworks.lab.webapp.config;
 
+import com.infoworks.lab.domain.entities.Passenger;
+import com.infoworks.lab.jsql.ExecutorType;
 import com.infoworks.lab.jsql.JsqlConfig;
 import com.it.soul.lab.connect.io.ScriptRunner;
+import com.it.soul.lab.sql.SQLExecutor;
+import com.it.soul.lab.sql.entity.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
@@ -24,10 +28,15 @@ public class StartupConfig implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         //
-        ScriptRunner runner = new ScriptRunner();
-        File file = new File("person_insert_dump.sql");
-        String[] cmds = runner.commands(runner.createStream(file));
-        runner.execute(cmds, jsqlConfig.pullConnection(dbKey));
+        try(SQLExecutor executor = (SQLExecutor) jsqlConfig.create(ExecutorType.SQL, dbKey)){
+            if(executor.getScalerValue(String.format("SELECT COUNT(*) FROM %s", Entity.tableName(Passenger.class))) == 0){
+                ScriptRunner runner = new ScriptRunner();
+                File file = new File("person_insert_dump.sql");
+                String[] cmds = runner.commands(runner.createStream(file));
+                runner.execute(cmds, jsqlConfig.pullConnection(dbKey));
+            }
+        }
+        //
         System.out.println("Startup Done");
     }
 }

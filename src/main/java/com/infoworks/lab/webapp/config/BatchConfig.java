@@ -111,19 +111,20 @@ public class BatchConfig {
             String query = String.format("SELECT * FROM %s LIMIT %s, %s", entity, cursor,  batchSize);
             System.out.println(query);
 
-            ItemReader<List<Passenger>> itemReader = new JdbcCursorItemReaderBuilder<List<Passenger>>()
+            ItemReader<Passenger> itemReader = new JdbcCursorItemReaderBuilder<Passenger>()
                     .dataSource(dataSource)
                     .name(String.format("%s_Reader", entity))
                     .sql(query)
+                    .rowMapper(new PassengerMapper())//OR Next Line
+                    //.rowMapper(new BeanPropertyRowMapper(Passenger.class))
                     .fetchSize(batchSize)
-                    .rowMapper(new PassengerRowsMapper(executor))
                     .build();
 
             Step batch = steps.get(String.format("batchStep_%s", cursor))
-                    .<List<Passenger>, List<Passenger>>chunk(batchSize)
+                    .<Passenger, Passenger>chunk(batchSize/2)
                     .reader(itemReader)
-                    .processor(new PassengerListProcessor())
-                    .writer(new PassengerListWriter())
+                    .processor(new PassengerProcessor())
+                    .writer(new PassengerWriter())
                     .build();
 
             if (batchJobBuilder == null){
@@ -141,9 +142,7 @@ public class BatchConfig {
 
     @Bean("jdbcMultiStepPagingJobSample")
     public Job multiStepPagingJob(DataSource dataSource, PagingQueryProvider provider) throws SQLException {
-
-        //SQLExecutor executor = new SQLExecutor(dataSource.getConnection());
-
+        //
         ItemReader<Passenger> itemReader = new JdbcPagingItemReaderBuilder<Passenger>()
                 .name("pagingItemReader")
                 .dataSource(dataSource)
