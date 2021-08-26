@@ -22,7 +22,7 @@ public class SampleBatchProcess extends AbstractBatchScheduler{
 
     public SampleBatchProcess(Environment env
             , JobLauncher jobLauncher
-            ,@Qualifier("jdbcMultiStepPagingJobSample") Job job) {
+            ,@Qualifier("jdbcJobSample") Job job) {
         super(env);
         this.env = env;
         this.jobLauncher = jobLauncher;

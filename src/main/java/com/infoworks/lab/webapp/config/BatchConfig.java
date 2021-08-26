@@ -74,21 +74,21 @@ public class BatchConfig {
     @Bean("jdbcJobSample")
     public Job sampleJob(DataSource dataSource) throws SQLException {
 
-        SQLExecutor executor = new SQLExecutor(dataSource.getConnection());
-
-        JdbcCursorItemReader<List<Passenger>> itemReader = new JdbcCursorItemReaderBuilder<List<Passenger>>()
+        ItemReader<Passenger> itemReader = new JdbcCursorItemReaderBuilder<Passenger>()
                 .dataSource(dataSource)
                 .name("PassengerReader")
-                .sql("select * from Passenger")
-                .rowMapper(new PassengerRowsMapper(executor))
-                .maxRows(batchSize)
+                .sql("SELECT * FROM Passenger")
+                .rowMapper(new PassengerMapper()) //OR Next Line
+                //.rowMapper(new BeanPropertyRowMapper(Passenger.class))
+                .fetchSize(batchSize)
+                //.maxRows(batchSize)
                 .build();
 
         Step one = steps.get("stepOne")
-                .<List<Passenger>, List<Passenger>>chunk(batchSize)
+                .<Passenger, Passenger>chunk(batchSize)
                 .reader(itemReader)
-                .processor(new PassengerListProcessor())
-                .writer(new PassengerListWriter())
+                .processor(new PassengerProcessor())
+                .writer(new PassengerWriter())
                 .build();
 
         return jobs.get("sampleJob")
@@ -111,7 +111,7 @@ public class BatchConfig {
             String query = String.format("SELECT * FROM %s LIMIT %s, %s", entity, cursor,  batchSize);
             System.out.println(query);
 
-            JdbcCursorItemReader<List<Passenger>> itemReader = new JdbcCursorItemReaderBuilder<List<Passenger>>()
+            ItemReader<List<Passenger>> itemReader = new JdbcCursorItemReaderBuilder<List<Passenger>>()
                     .dataSource(dataSource)
                     .name(String.format("%s_Reader", entity))
                     .sql(query)
