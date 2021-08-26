@@ -1,9 +1,8 @@
 package com.infoworks.lab.webapp.config;
 
-import com.infoworks.lab.controllers.batch.steps.PassengerListProcessor;
-import com.infoworks.lab.controllers.batch.steps.PassengerListWriter;
-import com.infoworks.lab.controllers.batch.steps.PassengerRowsMapper;
-import com.infoworks.lab.controllers.batch.tasks.*;
+import com.infoworks.lab.controllers.batch.steps.*;
+import com.infoworks.lab.controllers.batch.tasks.MyTaskOne;
+import com.infoworks.lab.controllers.batch.tasks.MyTaskTwo;
 import com.infoworks.lab.domain.entities.Passenger;
 import com.it.soul.lab.sql.SQLExecutor;
 import org.springframework.batch.core.Job;
@@ -11,20 +10,26 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.builder.JobFlowBuilder;
-import org.springframework.batch.core.job.builder.SimpleJobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.Order;
+import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableScheduling
@@ -132,6 +137,48 @@ public class BatchConfig {
         }
 
         return batchJobBuilder.end().build();
+    }
+
+    @Bean("jdbcMultiStepPagingJobSample")
+    public Job multiStepPagingJob(DataSource dataSource, PagingQueryProvider provider) throws SQLException {
+
+        //SQLExecutor executor = new SQLExecutor(dataSource.getConnection());
+
+        ItemReader<Passenger> itemReader = new JdbcPagingItemReaderBuilder<Passenger>()
+                .name("pagingItemReader")
+                .dataSource(dataSource)
+                .pageSize(batchSize)
+                .queryProvider(provider)
+                .rowMapper(new BeanPropertyRowMapper<>(Passenger.class))
+                .build();
+
+        Step one = steps.get("stepPaging")
+                .<Passenger, Passenger>chunk(batchSize)
+                .reader(itemReader)
+                .processor(new PassengerProcessor())
+                .writer(new PassengerWriter())
+                .build();
+
+        return jobs.get("samplePageJob")
+                .incrementer(new RunIdIncrementer())
+                .flow(one)
+                .end()
+                .build();
+    }
+
+    @Bean
+    public SqlPagingQueryProviderFactoryBean pagingQueryProviderFactoryBean(DataSource dataSource){
+        //
+        Map<String, Order> sortConfiguration = new HashMap<>();
+        sortConfiguration.put("id", Order.ASCENDING);
+        //
+        SqlPagingQueryProviderFactoryBean provider =
+                new SqlPagingQueryProviderFactoryBean();
+        provider.setDataSource(dataSource);
+        provider.setSelectClause("id, name, sex, age, dob, active");
+        provider.setFromClause("Passenger");
+        provider.setSortKeys(sortConfiguration);
+        return provider;
     }
 
 }
