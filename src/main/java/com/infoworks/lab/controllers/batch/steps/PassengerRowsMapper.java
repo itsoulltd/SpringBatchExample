@@ -1,4 +1,4 @@
-package com.infoworks.lab.controllers.batch.tasks;
+package com.infoworks.lab.controllers.batch.steps;
 
 import com.infoworks.lab.domain.entities.Passenger;
 import com.it.soul.lab.sql.SQLExecutor;
@@ -10,11 +10,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PassengerRowMapper implements RowMapper<List<Passenger>> {
+public class PassengerRowsMapper implements RowMapper<List<Passenger>> {
 
     private SQLExecutor executor;
 
-    public PassengerRowMapper(SQLExecutor executor) {
+    public PassengerRowsMapper(SQLExecutor executor) {
         this.executor = executor;
     }
 

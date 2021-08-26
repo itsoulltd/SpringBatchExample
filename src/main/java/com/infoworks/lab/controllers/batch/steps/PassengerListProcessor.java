@@ -1,11 +1,11 @@
-package com.infoworks.lab.controllers.batch.tasks;
+package com.infoworks.lab.controllers.batch.steps;
 
 import com.infoworks.lab.domain.entities.Passenger;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.util.List;
 
-public class PassengerItemProcessor implements ItemProcessor<List<Passenger>, List<Passenger>> {
+public class PassengerListProcessor implements ItemProcessor<List<Passenger>, List<Passenger>> {
 
     @Override
     public List<Passenger> process(List<Passenger> passengers) throws Exception {

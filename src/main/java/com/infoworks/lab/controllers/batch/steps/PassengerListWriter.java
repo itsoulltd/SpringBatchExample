@@ -1,11 +1,11 @@
-package com.infoworks.lab.controllers.batch.tasks;
+package com.infoworks.lab.controllers.batch.steps;
 
 import com.infoworks.lab.domain.entities.Passenger;
 import org.springframework.batch.item.ItemWriter;
 
 import java.util.List;
 
-public class ConsoleItemWriter implements ItemWriter<List<Passenger>> {
+public class PassengerListWriter implements ItemWriter<List<Passenger>> {
     @Override
     public void write(List<? extends List<Passenger>> list) throws Exception {
         if (list.size() < 0) return;

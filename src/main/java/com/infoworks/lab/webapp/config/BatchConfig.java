@@ -1,5 +1,8 @@
 package com.infoworks.lab.webapp.config;
 
+import com.infoworks.lab.controllers.batch.steps.PassengerListProcessor;
+import com.infoworks.lab.controllers.batch.steps.PassengerListWriter;
+import com.infoworks.lab.controllers.batch.steps.PassengerRowsMapper;
 import com.infoworks.lab.controllers.batch.tasks.*;
 import com.infoworks.lab.domain.entities.Passenger;
 import com.it.soul.lab.sql.SQLExecutor;
@@ -59,15 +62,15 @@ public class BatchConfig {
                 .dataSource(dataSource)
                 .name("PassengerReader")
                 .sql("select * from Passenger")
-                .rowMapper(new PassengerRowMapper(executor))
+                .rowMapper(new PassengerRowsMapper(executor))
                 .maxRows(10)
                 .build();
 
         Step one = steps.get("stepOne")
                 .<List<Passenger>, List<Passenger>>chunk(10)
                 .reader(itemReader)
-                .processor(new PassengerItemProcessor())
-                .writer(new ConsoleItemWriter())
+                .processor(new PassengerListProcessor())
+                .writer(new PassengerListWriter())
                 .build();
 
         return jobs.get("sampleJob")
