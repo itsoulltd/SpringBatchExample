@@ -1,10 +1,11 @@
 package com.infoworks.lab.webapp.config;
 
-import com.infoworks.lab.controllers.batch.steps.*;
+import com.infoworks.lab.controllers.batch.steps.PassengerMapper;
+import com.infoworks.lab.controllers.batch.steps.PassengerProcessor;
+import com.infoworks.lab.controllers.batch.steps.PassengerWriter;
 import com.infoworks.lab.controllers.batch.tasks.MyTaskOne;
 import com.infoworks.lab.controllers.batch.tasks.MyTaskTwo;
 import com.infoworks.lab.domain.entities.Passenger;
-import com.it.soul.lab.sql.SQLExecutor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -13,7 +14,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.job.builder.JobFlowBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
@@ -28,7 +28,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -102,7 +101,6 @@ public class BatchConfig {
     public Job multiStepSampleJob(DataSource dataSource) throws SQLException {
 
         JobFlowBuilder batchJobBuilder = null;
-        SQLExecutor executor = new SQLExecutor(dataSource.getConnection());
 
         String entity = Passenger.tableName(Passenger.class);
         int cursor = batchOffset;
