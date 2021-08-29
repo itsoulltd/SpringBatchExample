@@ -11,5 +11,6 @@ public class PassengerWriter implements ItemWriter<Passenger> {
         System.out.println("PassengerWriter: " + Thread.currentThread().getName());
         System.out.println("Chunk Size: " + list.size());
         list.forEach(passenger -> System.out.println(passenger.getName()));
+        System.out.println("\n");
     }
 }

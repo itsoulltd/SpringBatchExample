@@ -11,14 +11,15 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobFlowBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
-import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -139,16 +140,9 @@ public class BatchConfig {
     }
 
     @Bean("jdbcMultiStepPagingJobSample")
-    public Job multiStepPagingJob(DataSource dataSource, PagingQueryProvider provider) throws SQLException {
+    public Job multiStepPagingJob(@Qualifier("pagedPassengerReader") JdbcPagingItemReader<Passenger> itemReader)
+            throws SQLException {
         //
-        ItemReader<Passenger> itemReader = new JdbcPagingItemReaderBuilder<Passenger>()
-                .name("pagingItemReader")
-                .dataSource(dataSource)
-                .pageSize(batchSize)
-                .queryProvider(provider)
-                .rowMapper(new BeanPropertyRowMapper<>(Passenger.class))
-                .build();
-
         Step one = steps.get("stepPaging")
                 .<Passenger, Passenger>chunk(batchSize)
                 .reader(itemReader)
@@ -158,24 +152,30 @@ public class BatchConfig {
 
         return jobs.get("samplePageJob")
                 .incrementer(new RunIdIncrementer())
-                .flow(one)
-                .end()
+                .start(one)
                 .build();
     }
 
-    @Bean
-    public SqlPagingQueryProviderFactoryBean pagingQueryProviderFactoryBean(DataSource dataSource){
+    @Bean("pagedPassengerReader")
+    @StepScope
+    public JdbcPagingItemReader<Passenger> pagingItemReader(DataSource dataSource) {
         //
-        Map<String, Order> sortConfiguration = new HashMap<>();
-        sortConfiguration.put("id", Order.ASCENDING);
+        Map<String, Order> sortKeys = new HashMap<>();
+        sortKeys.put("id", Order.ASCENDING);
         //
-        SqlPagingQueryProviderFactoryBean provider =
-                new SqlPagingQueryProviderFactoryBean();
-        provider.setDataSource(dataSource);
-        provider.setSelectClause("id, name, sex, age, dob, active");
-        provider.setFromClause("Passenger");
-        provider.setSortKeys(sortConfiguration);
-        return provider;
+        MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
+        queryProvider.setSelectClause("id, name, sex, age, dob, active");
+        queryProvider.setFromClause("Passenger");
+        //queryProvider.setWhereClause("where id >= " + minValue + " and id < " + maxValue);
+        queryProvider.setSortKeys(sortKeys);
+        //
+        JdbcPagingItemReader<Passenger> reader = new JdbcPagingItemReader<>();
+        reader.setName("pagingItemReader");
+        reader.setDataSource(dataSource);
+        reader.setFetchSize(batchSize);
+        reader.setRowMapper(new BeanPropertyRowMapper<>(Passenger.class));
+        reader.setQueryProvider(queryProvider);
+        return reader;
     }
 
 }
