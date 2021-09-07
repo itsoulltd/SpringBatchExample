@@ -1,11 +1,15 @@
 package com.infoworks.lab.webapp.config;
 
+import com.infoworks.lab.controllers.batch.simple.SimpleProcessor;
+import com.infoworks.lab.controllers.batch.simple.SimpleReader;
+import com.infoworks.lab.controllers.batch.simple.SimpleWriter;
 import com.infoworks.lab.controllers.batch.steps.PassengerMapper;
 import com.infoworks.lab.controllers.batch.steps.PassengerProcessor;
 import com.infoworks.lab.controllers.batch.steps.PassengerWriter;
 import com.infoworks.lab.controllers.batch.tasks.MyTaskOne;
 import com.infoworks.lab.controllers.batch.tasks.MyTaskTwo;
 import com.infoworks.lab.domain.entities.Passenger;
+import com.infoworks.lab.rest.models.Message;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -42,6 +46,22 @@ public class BatchConfig {
     public BatchConfig(JobBuilderFactory jobs, StepBuilderFactory steps) {
         this.jobs = jobs;
         this.steps = steps;
+    }
+
+    @Bean("simpleJob")
+    public Job simpleJob(){
+
+        Step one = steps.get("stepOne")
+                .<Message, Message>chunk(batchSize)
+                .reader(new SimpleReader())
+                .processor(new SimpleProcessor())
+                .writer(new SimpleWriter())
+                .build();
+
+        return jobs.get("simpleJob")
+                .incrementer(new RunIdIncrementer())
+                .start(one)
+                .build();
     }
 
     @Bean("taskletJobSample")
