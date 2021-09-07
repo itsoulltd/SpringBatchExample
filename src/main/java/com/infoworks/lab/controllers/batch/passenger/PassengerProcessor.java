@@ -1,4 +1,4 @@
-package com.infoworks.lab.controllers.batch.steps;
+package com.infoworks.lab.controllers.batch.passenger;
 
 import com.infoworks.lab.domain.entities.Passenger;
 import org.springframework.batch.item.ItemProcessor;

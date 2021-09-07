@@ -1,11 +1,11 @@
-package com.infoworks.lab.controllers.batch.simple;
+package com.infoworks.lab.controllers.batch.message;
 
 import com.infoworks.lab.rest.models.Message;
 import org.springframework.batch.item.ItemWriter;
 
 import java.util.List;
 
-public class SimpleWriter implements ItemWriter<Message> {
+public class MessageWriter implements ItemWriter<Message> {
     @Override
     public void write(List<? extends Message> list) throws Exception {
         System.out.println("SimpleWriter");

@@ -1,11 +1,11 @@
 package com.infoworks.lab.webapp.config;
 
-import com.infoworks.lab.controllers.batch.simple.SimpleProcessor;
-import com.infoworks.lab.controllers.batch.simple.SimpleReader;
-import com.infoworks.lab.controllers.batch.simple.SimpleWriter;
-import com.infoworks.lab.controllers.batch.steps.PassengerMapper;
-import com.infoworks.lab.controllers.batch.steps.PassengerProcessor;
-import com.infoworks.lab.controllers.batch.steps.PassengerWriter;
+import com.infoworks.lab.controllers.batch.message.MessageProcessor;
+import com.infoworks.lab.controllers.batch.message.MessageReader;
+import com.infoworks.lab.controllers.batch.message.MessageWriter;
+import com.infoworks.lab.controllers.batch.passenger.PassengerMapper;
+import com.infoworks.lab.controllers.batch.passenger.PassengerProcessor;
+import com.infoworks.lab.controllers.batch.passenger.PassengerWriter;
 import com.infoworks.lab.controllers.batch.tasks.MyTaskOne;
 import com.infoworks.lab.controllers.batch.tasks.MyTaskTwo;
 import com.infoworks.lab.domain.entities.Passenger;
@@ -27,8 +27,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -36,8 +36,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableScheduling
 @EnableBatchProcessing
+@PropertySource("classpath:batch-job.properties")
 public class BatchConfig {
 
     private JobBuilderFactory jobs;
@@ -48,14 +48,23 @@ public class BatchConfig {
         this.steps = steps;
     }
 
+    @Value("${batch.processing.batch.size}")
+    private Integer batchSize;
+
+    @Value("${batch.processing.batch.offset}")
+    private Integer batchOffset;
+
+    @Value("${batch.processing.batch.max.size}")
+    private Integer batchMaxSize;
+
     @Bean("simpleJob")
     public Job simpleJob(){
 
         Step one = steps.get("stepOne")
                 .<Message, Message>chunk(batchSize)
-                .reader(new SimpleReader())
-                .processor(new SimpleProcessor())
-                .writer(new SimpleWriter())
+                .reader(new MessageReader())
+                .processor(new MessageProcessor())
+                .writer(new MessageWriter())
                 .build();
 
         return jobs.get("simpleJob")
@@ -81,15 +90,6 @@ public class BatchConfig {
                 .next(two)
                 .build();
     }
-
-    @Value("${batch.processing.batch.size}")
-    private Integer batchSize;
-
-    @Value("${batch.processing.batch.offset}")
-    private Integer batchOffset;
-
-    @Value("${batch.processing.batch.max.size}")
-    private Integer batchMaxSize;
 
     @Bean("jdbcJobSample")
     public Job sampleJob(DataSource dataSource) throws SQLException {

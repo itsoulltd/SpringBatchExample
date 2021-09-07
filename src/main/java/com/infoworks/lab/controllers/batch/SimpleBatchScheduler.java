@@ -9,25 +9,25 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SampleBatchProcess extends AbstractBatchScheduler{
+public class SimpleBatchScheduler {
 
-    private Environment env;
     private JobLauncher jobLauncher;
     private Job job;
 
-    public SampleBatchProcess(Environment env
-            , JobLauncher jobLauncher
-            ,@Qualifier("simpleJob") Job job) {
-        super(env);
-        this.env = env;
+    public SimpleBatchScheduler(JobLauncher jobLauncher
+            , @Qualifier("simpleJob") Job job) {
         this.jobLauncher = jobLauncher;
         this.job = job;
     }
+
+    @Value("${batch.processing.cron.prevent.execution}")
+    private boolean shouldPreventExecution;
 
     /**
      *  (second, minute, hour, day of month, month, day(s) of week)
@@ -44,7 +44,10 @@ public class SampleBatchProcess extends AbstractBatchScheduler{
 
     @Scheduled(cron = "${batch.processing.cron.expression}")
     public void process() {
-        if (shouldPreventExecution()) return;
+        if (shouldPreventExecution){
+            System.out.println("ShouldPreventExecution: YES");
+            return;
+        }
         //
         System.out.println("Running");
         JobParameters params = new JobParametersBuilder()

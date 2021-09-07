@@ -1,4 +1,4 @@
-package com.infoworks.lab.controllers.batch.simple;
+package com.infoworks.lab.controllers.batch.message;
 
 import com.infoworks.lab.rest.models.Message;
 import org.springframework.batch.item.ItemReader;
@@ -8,7 +8,7 @@ import org.springframework.batch.item.UnexpectedInputException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimpleReader implements ItemReader<Message> {
+public class MessageReader implements ItemReader<Message> {
 
     private AtomicInteger counter = new AtomicInteger(0);
 

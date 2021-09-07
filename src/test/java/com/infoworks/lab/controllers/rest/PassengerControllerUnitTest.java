@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.infoworks.lab.domain.entities.Gender;
 import com.infoworks.lab.domain.entities.Passenger;
 import com.infoworks.lab.services.iServices.iPassengerService;
-import com.infoworks.lab.webapp.WebApplicationTest;
+import com.infoworks.lab.webapp.BatchProcessingAppTest;
 import com.infoworks.lab.webapp.config.BeanConfig;
 import com.infoworks.lab.webapp.config.TestJPAConfig;
 import org.junit.Before;
@@ -24,12 +24,11 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        classes = {WebApplicationTest.class, TestJPAConfig.class, BeanConfig.class})
+        classes = {BatchProcessingAppTest.class, TestJPAConfig.class, BeanConfig.class})
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:h2-db.properties")
 public class PassengerControllerUnitTest {

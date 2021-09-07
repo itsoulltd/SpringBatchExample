@@ -1,9 +1,9 @@
-package com.infoworks.lab.controllers.batch.simple;
+package com.infoworks.lab.controllers.batch.message;
 
 import com.infoworks.lab.rest.models.Message;
 import org.springframework.batch.item.ItemProcessor;
 
-public class SimpleProcessor implements ItemProcessor<Message, Message> {
+public class MessageProcessor implements ItemProcessor<Message, Message> {
     @Override
     public Message process(Message o) throws Exception {
         System.out.println("SimpleProcessor");
