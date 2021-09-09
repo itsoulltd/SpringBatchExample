@@ -63,8 +63,8 @@ public class BatchConfig {
     public Job simpleJob(){
 
         TaskExecutor executor = new SimpleAsyncTaskExecutor();
-        int numberOfCore = Runtime.getRuntime().availableProcessors();
-        ((SimpleAsyncTaskExecutor)executor).setConcurrencyLimit((numberOfCore / 2) + 1);
+        //int numberOfCore = Runtime.getRuntime().availableProcessors();
+        //((SimpleAsyncTaskExecutor)executor).setConcurrencyLimit((numberOfCore / 2) + 1);
 
         Step one = steps.get("stepOne")
                 .<Message, Message>chunk(batchSize)
@@ -72,6 +72,7 @@ public class BatchConfig {
                 .processor(new MessageProcessor())
                 .writer(new MessageWriter())
                 //.taskExecutor(new SimpleAsyncTaskExecutor())
+                //.throttleLimit(5)
                 .build();
 
         return jobs.get("simpleJob")
