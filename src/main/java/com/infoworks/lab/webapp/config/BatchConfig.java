@@ -65,6 +65,7 @@ public class BatchConfig {
                 .reader(new MessageReader())
                 .processor(new MessageProcessor())
                 .writer(new MessageWriter())
+                //.taskExecutor(new SimpleAsyncTaskExecutor())
                 .build();
 
         return jobs.get("simpleJob")
