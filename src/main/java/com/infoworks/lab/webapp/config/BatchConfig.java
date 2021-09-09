@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import javax.sql.DataSource;
@@ -59,6 +61,10 @@ public class BatchConfig {
 
     @Bean("simpleJob")
     public Job simpleJob(){
+
+        TaskExecutor executor = new SimpleAsyncTaskExecutor();
+        int numberOfCore = Runtime.getRuntime().availableProcessors();
+        ((SimpleAsyncTaskExecutor)executor).setConcurrencyLimit((numberOfCore / 2) + 1);
 
         Step one = steps.get("stepOne")
                 .<Message, Message>chunk(batchSize)
