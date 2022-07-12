@@ -1,4 +1,4 @@
-package com.infoworks.lab.webapp.config;
+package com.infoworks.lab.controllers.batch;
 
 import com.infoworks.lab.controllers.batch.message.MessageProcessor;
 import com.infoworks.lab.controllers.batch.message.MessageReader;
@@ -12,7 +12,6 @@ import com.infoworks.lab.domain.entities.Passenger;
 import com.infoworks.lab.rest.models.Message;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -38,7 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableBatchProcessing
 @PropertySource("classpath:batch-job.properties")
 public class BatchConfig {
 
